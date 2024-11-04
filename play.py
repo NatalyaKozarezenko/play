@@ -13,7 +13,7 @@ import pygame
 
 # функция для подготовки модулей pygame к работе
 pygame.init()
-# вывод текста на кубике (хотелось бы что-то красивое, чтоб анимация)
+# вывод текста на кубике (хотелось бы что-то красивое типа анимации)
 pygame.font.init()
 
 # размер ячейки - от него и скачем
@@ -140,130 +140,80 @@ class CellDoubleStep(GameObject):
             self.draw_cell()
 
 
-class CellHelp(GameObject):
-    """Поля-подсказки, куда можно ходить"""
+class CellHelp():
+    """Поля-подсказки, куда можно ходить."""
     def __init__(self):
-        super().__init__(color=None)
         self.positions = []
 
-    def into_playin_field(self, x, y):
-        """Если такие координаты возможны, то сохраняем"""
+    def into_field(self, x, y):
+        """Если координаты внутри поля, то сохраняем."""
         if 0 <= x < SCREEN_WIDTH and 0 <= y < SCREEN_HEIGHT:
             list.append(self.positions, (x, y))
 
-    def get_up_down(self, player_position, step, direction):
-        """ячейки сверху и снизу"""
-        position_x, position_y = player_position
-        # print('up down', position_x, position_y + GRID_SIZE * step * direction)
-        self.into_playin_field(position_x, position_y + GRID_SIZE * step * direction)
+    def get_correct_steps(self, step_x, step_y, *player_position):
+        self.into_field(
+            player_position[0] + GRID_SIZE * step_x,
+            player_position[1] + GRID_SIZE * step_y
+        )
 
-    def get_left_right(self, player_position, step, direction):
-        """ячейки справа и слева"""
-        position_x, position_y = player_position
-        # print('left right', position_x + GRID_SIZE * step * direction, position_y)
-        self.into_playin_field(position_x + GRID_SIZE * step * direction, position_y)
-
-    def get_diagonal(self, player_position, step, direction):
-        """ячейки левая верхняя и правая нижняя"""
-        position_x, position_y = player_position
-        self.into_playin_field(position_x + GRID_SIZE * step * direction, position_y + GRID_SIZE * step * direction) 
-
-    def get_diagonal_two(self, player_position, step, direction):
-        """ячейки левая нижняя и правая верхняя"""
-        position_x, position_y = player_position
-        self.into_playin_field(position_x + GRID_SIZE * step * direction, position_y - GRID_SIZE * step * direction) 
-
-    def get_position(self, value, player_position):
-        """Позиции полей куда можно пойти"""
-        print('get_position', player_position)
+    def get_position(self, value, position):
+        """Позиции полей куда можно пойти от значения кубика."""
+        print('начальное поле игрока', position)
         if value == 1:
             # Пешка – ход вверх на одну клетку.
-            # (если рядом граница, то есть ходить не куда дальше, то играющий пропускает ход).
-            self.get_up_down(player_position, 1, -1)
-        if value == 2:
+            self.get_correct_steps(0, -1, *position)
+        elif value == 2:
             # Ладья – ходит вверх или низ, или вправо, или влево на 2 клетки.
-            # вверх
-            self.get_up_down(player_position, 2, -1)
-            # вниз
-            self.get_up_down(player_position, 2, 1)
-            # вправо
-            self.get_left_right(player_position, 2, 1)
-            # влево
-            self.get_left_right(player_position, 2, -1)
-        if value == 3:
+            self.get_correct_steps(0, -2, *position)            # вверх
+            self.get_correct_steps(0, 2, *position)             # вниз
+            self.get_correct_steps(2, 0, *position)             # вправо
+            self.get_correct_steps(-2, 0, *position)            # влево
+        elif value == 3:
             # Король – ходит в любом направлении на 1 клетку.
-            # вверх
-            self.get_up_down(player_position, 1, -1)
-            # вниз
-            self.get_up_down(player_position, 1, 1)
-            # вправо
-            self.get_left_right(player_position, 1, 1)
-            # влево
-            self.get_left_right(player_position, 1, -1)
-            # вправо по диагонали вверх
-            self.get_diagonal_two(player_position, 1, 1)
-            # вправо по диагонали вниз
-            self.get_diagonal(player_position, 1, 1)
-            # влево по диагонали вниз
-            self.get_diagonal_two(player_position, 1, -1)
-            # влево по диагонали вверх
-            self.get_diagonal(player_position, 1, -1)
-        if value == 4:
+            self.get_correct_steps(0, -1, *position)            # вверх
+            self.get_correct_steps(0, 1, *position)             # вниз
+            self.get_correct_steps(1, 0, *position)             # вправо
+            self.get_correct_steps(-1, 0, *position)            # влево
+            self.get_correct_steps(1, -1, *position)            # вправо по диагонали вверх
+            self.get_correct_steps(1, 1, *position)             # вправо по диагонали вниз
+            self.get_correct_steps(-1, 1, *position)            # влево по диагонали вниз
+            self.get_correct_steps(-1, -1, *position)           # влево по диагонали вверх
+        elif value == 4:
             # Слон – ходит по диагонали в любую сторону на 2 клетки.
-            # вправо по диагонали вверх
-            self.get_diagonal_two(player_position, 2, 1)
-            # вправо по диагонали вниз
-            self.get_diagonal(player_position, 2, 1)
-            # влево по диагонали вниз
-            self.get_diagonal_two(player_position, 2, -1)
-            # влево по диагонали вверх
-            self.get_diagonal(player_position, 2, -1)
-
-        if value == 5:
+            self.get_correct_steps(2, -2, *position)            # вправо по диагонали вверх
+            self.get_correct_steps(2, 2, *position)             # вправо по диагонали вниз
+            self.get_correct_steps(-2, 2, *position)            # влево по диагонали вниз
+            self.get_correct_steps(-2, -2, *position)            # влево по диагонали вверх
+        elif value == 5:
             # Конь – «буквой Г».
-            # вправо вниз
-            position_x, position_y = player_position
-            self.into_playin_field(position_x + GRID_SIZE * 3 * 1, position_y + GRID_SIZE * 1 * 1)
-            # вправо вверх
-            position_x, position_y = player_position
-            self.into_playin_field(position_x + GRID_SIZE * 3 * 1, position_y - GRID_SIZE * 1 * 1)
-            # вверх
-            position_x, position_y = player_position
-            self.into_playin_field(position_x - GRID_SIZE * 1 * 1, position_y - GRID_SIZE * 3 * 1)
-            self.into_playin_field(position_x + GRID_SIZE * 1 * 1, position_y + GRID_SIZE * 3 * 1)
-            # вниз
-            # влево  
-        if value == 6:
-            # Ферзь – ходит в любую сторону на 2 клетки.
-            # вверх
-            self.get_up_down(player_position, 2, -1)
-            # вниз
-            self.get_up_down(player_position, 2, 1)
-            # вправо
-            self.get_left_right(player_position, 2, 1)
-            # влево
-            self.get_left_right(player_position, 2, -1)
-            # вправо по диагонали вверх
-            self.get_diagonal_two(player_position, 2, 1)
-            # вправо по диагонали вниз
-            self.get_diagonal(player_position, 2, 1)
-            # влево по диагонали вниз
-            self.get_diagonal_two(player_position, 2, -1)
-            # влево по диагонали вверх
-            self.get_diagonal(player_position, 2, -1)
+            self.get_correct_steps(3, 1, *position)             # вправо вниз
+            self.get_correct_steps(3, -1, *position)            # вправо вверх
+            self.get_correct_steps(-1, -3, *position)           # вверх
+            self.get_correct_steps(1, -3, *position)
+            self.get_correct_steps(-1, 3, *position)            # вниз
+            self.get_correct_steps( 1, 3, *position)
+            self.get_correct_steps(-3, 1, *position)            # влево
+            self.get_correct_steps(-3, -1, *position)
+        else:
+            # value == 6: Ферзь – ходит в любую сторону на 2 клетки.
+            self.get_correct_steps(0, -2, *position)            # вверх
+            self.get_correct_steps(0, 2, *position)             # вниз
+            self.get_correct_steps(2, 0, *position)             # вправо
+            self.get_correct_steps(-2, 0, *position)            # влево
+            self.get_correct_steps(2, -2, *position)            # вправо по диагонали вверх
+            self.get_correct_steps(2, 2, *position)             # вправо по диагонали вниз
+            self.get_correct_steps(-2, 2, *position)            # влево по диагонали вниз
+            self.get_correct_steps(-2, -2, *position)           # влево по диагонали вверх
 
     def draw(self, color):
         """Для каждой ячейки, куда может пойти пользователь вызываем отрисовку."""
-        print(self.positions)
         for self.position in self.positions:
             self.draw_cell(color)
 
     def draw_cell(self, color):
         """Бордер для ячеки, куда может пойти пользователь."""
-        # +1 - так граница "сверху", красивше
-        rect = pygame.Rect(self.position, (GRID_SIZE + 1, GRID_SIZE + 1))
+        rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
         pygame.draw.rect(screen, color, rect, 1)
-        # print(self.position)
 
 
 class Cube():
@@ -298,9 +248,6 @@ class Player():
 
     def draw(self, image_file):
         image_file = image_file
-        # player = pygame.Rect(self.position, (30, 30))
-        # pygame.draw.rect(screen, (0, 50, 80), player)
-        # image = pygame.Surface([40,80], pygame.SRCALPHA, 32)
         image = pygame.image.load(image_file)
         image = image.convert_alpha()
 
@@ -343,6 +290,15 @@ def can_step(mouse_position, good_positions):
     return (1000, 1000)
 
 
+def draw_together(self, direction, images):
+    x, y = self.position
+    # делаем смещение
+    self.position = (x + direction, y)
+    self.draw(images)
+    # возвращаем как было
+    self.position = (x, y)
+
+
 def main():
     cell_not_step = CellNotStep()
     cell_double_step = CellDoubleStep()
@@ -350,18 +306,17 @@ def main():
     player = Player()
     comp = Player()
     cell_help = CellHelp()
-    # рисуем окно для начала игры: все для первого хода пользователя
+    # поле с особенными полями
     cell_not_step.draw()
     cell_double_step.draw()
-    # расстановка фишек на старт
-    # СДЕЛАТЬ пользователя со смещением, чтоб виден был
-    player.draw(PLAYER_IMAGE)
-    # пока накладываются: или смещать или картинку менять?
-    # comp.position = (
-    #         STRAT_WIDTH,
-    #         STRAT_HEIGHT
-    #     )
-    comp.draw(COMP_IMAGE)
+    # расстановка двух фишек на старт
+    together = True
+    if together:
+        draw_together(player, 10, PLAYER_IMAGE)
+        draw_together(comp, -10, COMP_IMAGE)
+    else:
+        player.draw(PLAYER_IMAGE)
+        comp.draw(COMP_IMAGE)
     # бросили кубик
     value = cube.count()
     # отразили
@@ -373,7 +328,7 @@ def main():
         # подсветим поля куда можно пойти
         if cell_help.get_position(value, player.position) != []:
             cell_help.draw(HELP_COLOR)
-            print('подсветка полей', value, cell_help.positions)
+            print('подсветка полей', cell_help.positions, 'кубик', value)
             # отразили красоту
             pygame.display.flip()
             mouse_position = None
@@ -385,7 +340,7 @@ def main():
                 # проверяем а туда ли нажал?
                 if mouse_position is not None:
                     new_position = can_step(mouse_position, cell_help.positions)
-
+            # !!!!!!!!!!!!!(если рядом граница, то есть ходить не куда дальше, то играющий пропускает ход).
             # стираем старую фишк на черном поле.
             player.reset()
             # стираем старую фишку с поля старт
@@ -418,7 +373,7 @@ def main():
         # Если есть куда ходить:
         if cell_help.get_position(value, comp.position) != []:
             # УРОВЕНЬ: дурак - выбор случайный
-            print(len(cell_help.positions)-1)
+            print('кол-во ячеек-подсказок у компа', len(cell_help.positions)-1, 'кубик', value)
             select_position = randint(0, len(cell_help.positions)-1)
             # стираем фишку
             comp.reset()
