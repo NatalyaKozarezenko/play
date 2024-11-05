@@ -39,105 +39,100 @@ HELP_COLOR = (255, 255, 255)
 # картинки фишек
 PLAYER_IMAGE = 'images\green.png'
 COMP_IMAGE = 'images\myred.png'
-
-# рисуем ПОЛЕ
-screen = pygame.display.set_mode((SCREEN_WIDTH + LEFT_PANEL, SCREEN_HEIGHT))
-for i in range(1, COUNT_GRID+1):
-    pygame.draw.line(screen, LINE_COLOR, (GRID_SIZE * i, 0), (GRID_SIZE * i, SCREEN_HEIGHT), width=1)
-    pygame.draw.line(screen, LINE_COLOR, (0, GRID_SIZE * i), (SCREEN_WIDTH, GRID_SIZE * i), width=1)
-
-pygame.display.set_caption(
-    '"Шахматная головоломка". Игра-бродилка.'
-)
-
-# рисуем поле "СТАРТ"
+START_IMAGE = 'images\start.png'
+FINISH_IMAGE = 'images\myfinish.png'
+# координаты поля "СТАРТ"
 STRAT_WIDTH, STRAT_HEIGHT = 0, SCREEN_HEIGHT - GRID_SIZE
-# .convert() - переводит формат кодирования пикселей поверхности в формат 
-# кодирования пикселей главной поверхности. При выполнении игры это ускоряет отрисовку поверхностей.
-image = pygame.image.load('images\start.png').convert()
-# картинка СТАРТ 300Х300, а должена помещаться в GRID_SIZE:
-scale = pygame.transform.scale(image, (GRID_SIZE, GRID_SIZE))
-# рисуем поле "ФИНИШ"
-...
-# отразим на экране
-screen.blit(scale, (STRAT_WIDTH, STRAT_HEIGHT))
+# координаты поля "ФИНИШ" справа верх, но не самый угол
+FINISH_WIDTH, FINISH_HEIGHT = GRID_SIZE * (COUNT_GRID - 2), GRID_SIZE * (COUNT_GRID - 6)
 
+# Задаем экран
+screen = pygame.display.set_mode((SCREEN_WIDTH + LEFT_PANEL, SCREEN_HEIGHT))
+pygame.display.set_caption(
+        '"Шахматная головоломка". Игра-бродилка.'
+    )
+
+
+def draw_cell(image, position):
+    """Рисуем картинки в ячейках."""
+    # .convert() - переводит формат кодирования пикселей поверхности в формат
+    # кодирования это ускоряет отрисовку поверхностей.
+    # картинка должна помещаться в GRID_SIZE
+    scale = pygame.transform.scale(pygame.image.load(image).convert(), (GRID_SIZE, GRID_SIZE))
+    screen.blit(scale, position)
+
+
+def draw_field():
+    """Рисуем ячейки на поле."""
+    for i in range(1, COUNT_GRID+1):
+        pygame.draw.line(screen, LINE_COLOR, (GRID_SIZE * i, 0), (GRID_SIZE * i, SCREEN_HEIGHT), width=1)
+        pygame.draw.line(screen, LINE_COLOR, (0, GRID_SIZE * i), (SCREEN_WIDTH, GRID_SIZE * i), width=1)
+
+    # рисуем поле "СТАРТ" ленвый нижний угол
+    draw_cell(START_IMAGE, (STRAT_WIDTH, STRAT_HEIGHT))
+    # рисуем поле "ФИНИШ" вправо верх, не угол
+    draw_cell(FINISH_IMAGE, (FINISH_WIDTH, FINISH_HEIGHT))
 
 
 class GameObject:
-    """Основной класс для полей-ячеек с доп функцией."""
+    """Основной класс для ячеек с доп функцией."""
 
     def __init__(self, color=None):
-        """пока так, тут руки не дошли."""
-        self.body_color = color
-        self.position = (
-            SCREEN_WIDTH // 2,
-            SCREEN_HEIGHT // 2
-        )
+        # количество особенных полей:
+        self.count = 3
+        self.color = color
+        self.positions = []
+        self.general_position()
+
+    def general_position(self):
+        """Задаем случайное положение."""
+        for i in range(0, self.count):
+            list.append(self.positions, self.randomize_position())
 
     def draw(self):
-        """Метод должен определять, как объект будет
-        отрисовываться на экране. По умолчанию — pass.
-        """
-        pass
+        """Рисуем на экране."""
+        for self.position in self.positions:
+            self.draw_cell()
 
     def draw_cell(self):
-        """метод отрисовки единственного элемента."""
+        """Закрашиваем ячейку."""
         rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
-        pygame.draw.rect(screen, self.body_color, rect)
+        pygame.draw.rect(screen, self.color, rect)
         pygame.draw.rect(screen, LINE_COLOR, rect, 1)
 
     def randomize_position(self):
-        """Вычисляем случайное положение элемента."""
-        # ДОБАВИТЬ список не возможные ячеек: старт, финиш
-        used_cells = [(STRAT_WIDTH, STRAT_HEIGHT)]
-
-        return (
-            randint(0, COUNT_GRID - 1) * GRID_SIZE,
-            randint(0, COUNT_GRID - 1) * GRID_SIZE
-        )
+        """Вычисляем случайное положение ячейки."""
+        # Исключаем занятые ячейки: старт, финиш чтоб ячейки не накладывались
+        used_cells = [(STRAT_WIDTH, STRAT_HEIGHT), (FINISH_WIDTH, FINISH_HEIGHT)]
+        for used_cell in used_cells:
+            x = randint(0, COUNT_GRID - 1) * GRID_SIZE
+            y = randint(0, COUNT_GRID - 1) * GRID_SIZE
+            if (x, y) != used_cell:
+                return (x, y)
 
 
 class CellNotStep(GameObject):
-    """Ячейки с пропуском хода"""
+    """Ячейки пропуск хода."""
 
     def __init__(self):
-        super().__init__(color=CELL_NOT_STEP_COLOR)
+        super().__init__()
         # количество полей пропуск хода:
         self.count = 3
+        self.color = CELL_NOT_STEP_COLOR
         self.positions = []
         self.general_position()
-
-    def general_position(self):
-        """Задаем случайное положение."""
-        for i in range(0, self.count):
-            list.append(self.positions, self.randomize_position())
-
-    def draw(self):
-        """Рисуем на экране."""
-        for self.position in self.positions:
-            self.draw_cell()
 
 
 class CellDoubleStep(GameObject):
-    """Ячейки с пропуском хода"""
+    """Ячейки дополнительный ход."""
 
     def __init__(self):
-        super().__init__(color=CELL_DOUBLE_STEP_COLOR)
-        # количество полей пропуск хода:
+        super().__init__()
+        # количество полей дополнительного хода:
         self.count = 3
+        self.color = CELL_DOUBLE_STEP_COLOR
         self.positions = []
         self.general_position()
-
-    def general_position(self):
-        """Задаем случайное положение."""
-        for i in range(0, self.count):
-            list.append(self.positions, self.randomize_position())
-
-    def draw(self):
-        """Рисуем на экране."""
-        for self.position in self.positions:
-            self.draw_cell()
 
 
 class CellHelp():
@@ -234,7 +229,9 @@ class Cube():
 
     def count(self):
         # у кубика 6 сторон
-        return randint(1, 6)
+        value = randint(1, 6)
+        self.draw(value)
+        return value
 
 
 class Player():
@@ -257,9 +254,13 @@ class Player():
         screen.blit(scale, self.position)
 
     def reset(self):
-        player = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
-        pygame.draw.rect(screen, (0, 0, 0), player)
-        pygame.draw.rect(screen, LINE_COLOR, player, 1)
+        if self.position == (STRAT_WIDTH, STRAT_HEIGHT):
+            # если ушли с поля "СТАРТ"
+            draw_cell(START_IMAGE, (STRAT_WIDTH, STRAT_HEIGHT))
+        else:
+            player = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
+            pygame.draw.rect(screen, (0, 0, 0), player)
+            pygame.draw.rect(screen, LINE_COLOR, player, 1)
 
 
 def handle_keys(game_object):
@@ -300,13 +301,14 @@ def draw_together(self, direction, images):
 
 
 def main():
+    draw_field()
     cell_not_step = CellNotStep()
     cell_double_step = CellDoubleStep()
     cube = Cube()
     player = Player()
     comp = Player()
     cell_help = CellHelp()
-    # поле с особенными полями
+    # создаем ячейки с особенными полями
     cell_not_step.draw()
     cell_double_step.draw()
     # расстановка двух фишек на старт
@@ -319,17 +321,15 @@ def main():
         comp.draw(COMP_IMAGE)
     # бросили кубик
     value = cube.count()
-    # отразили
-    cube.draw(value)
     # ОТРИСОВКА НАЧАЛА ИГРЫ: фишки на старте + кубик
     pygame.display.flip()
     while True:
         # ХОД ПОЛЬЗОВАТЕЛЯ
-        # подсветим поля куда можно пойти
+        # находим поля куда можно пойти
         if cell_help.get_position(value, player.position) != []:
             cell_help.draw(HELP_COLOR)
             print('подсветка полей', cell_help.positions, 'кубик', value)
-            # отразили красоту
+            # показали поля куда можно пойти
             pygame.display.flip()
             mouse_position = None
             # заведомо ложные координаты
@@ -340,33 +340,34 @@ def main():
                 # проверяем а туда ли нажал?
                 if mouse_position is not None:
                     new_position = can_step(mouse_position, cell_help.positions)
-            # !!!!!!!!!!!!!(если рядом граница, то есть ходить не куда дальше, то играющий пропускает ход).
-            # стираем старую фишк на черном поле.
+            # стираем старую фишку
             player.reset()
-            # стираем старую фишку с поля старт
-            screen.blit(scale, (STRAT_WIDTH, STRAT_HEIGHT))
             # Туда! задаем новую позицию
             player.position = new_position
             # рисуем новую фишку
             player.draw(PLAYER_IMAGE)
-            # скрываем подсказки 
+            # скрываем подсказки
             cell_help.draw(LINE_COLOR)
             # подсказки обнулили
             cell_help.positions = []
             pygame.display.flip()
+            # проверка на особенность ячейки:
+            # если ячека доп ход
+            if player.position in cell_double_step.positions:
+                print('Ещё один ход.')
+            # если ячека пропуск хода
+            if player.position in cell_not_step.positions:
+                print('Пропуск хода игрока.')
         else:
             # А если пусто подсказках - то пропуск хода: ПРИДУМАТЬ В КАКОМ ВИДЕ СООБЩАТЬ
+            # Например: если рядом граница, то есть ходить не куда дальше
             print('Пропуск хода игрока.')
-        # проверка на особенность ячейки:
-        # если ячека доп ход
-        ...
-        # если ячека пропуск хода
-        ...
+
         # ХОД КОМПА
         # бросили кубик для компа
         value = cube.count()
         # отразили
-        cube.draw(value)
+        # cube.draw(value)
         # На Экран: новое значение кубика, нет подсказок
         pygame.display.flip()
         # ходит комп: определяем на какие поля можем сходить
@@ -388,7 +389,7 @@ def main():
         # НАЧАЛО СЛЕДУЮЩЕГО ХОДА ПОЛЬЗОВАТЕЛЯ
         # бросили кубик для пользователя и отразили
         value = cube.count()
-        cube.draw(value)
+        # cube.draw(value)
         pygame.display.update()
 
 
