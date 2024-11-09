@@ -206,7 +206,7 @@ class CellHelp():
 
     def draw_cell(self, color):
         """Бордер для ячеки, куда может пойти пользователь."""
-        rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
+        rect = pygame.Rect(self.position, (GRID_SIZE+1, GRID_SIZE+1))
         pygame.draw.rect(screen, color, rect, 1)
 
 
@@ -324,7 +324,7 @@ def draw_cell(image, position):
 
 def draw_field():
     """Игровое поле: ячейки, СТАРТ, ФИНИШ"""
-    for i in range(1, COUNT_GRID+1):
+    for i in range(0, COUNT_GRID+1):
         pygame.draw.line(screen, LINE_COLOR, (GRID_SIZE * i, 0), (GRID_SIZE * i, SCREEN_HEIGHT), width=1)
         pygame.draw.line(screen, LINE_COLOR, (0, GRID_SIZE * i), (SCREEN_WIDTH, GRID_SIZE * i), width=1)
 
@@ -374,7 +374,7 @@ def double_step(game_object, cell_double_step):
 
 def reset(position, color=BOARD_BACKGROUND_COLOR):
     """Окрашиваем ячейку с которой уходим в её цвет."""
-    cell = pygame.Rect(position, (GRID_SIZE, GRID_SIZE))
+    cell = pygame.Rect(position, (GRID_SIZE+1, GRID_SIZE+1))
     pygame.draw.rect(screen, color, cell)
     pygame.draw.rect(screen, LINE_COLOR, cell, 1)
 
