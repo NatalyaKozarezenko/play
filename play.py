@@ -13,17 +13,17 @@ import pygame
 
 # from random import randint
 # from moviepy import ImageSequenceClip
-from constants import (ALL_WIDTH, BACKGROUND_IMAGE, BACKGROUND_IMAGE_LOSS,
-                       BACKGROUND_IMAGE_MAIN, BACKGROUND_IMAGE_MENU,
-                       BEETWEEN_HEAD_1_TEXT, BETWEEN_HEAD_HEAD_1,
-                       BOARD_BORDER_X_R, BOARD_BORDER_Y, BOARD_HEIGHT,
-                       BOARD_WIDTH, CELL_DOUBLE_STEP_COLOR,
-                       CELL_NOT_STEP_COLOR, COMP_IMAGE, COUNT_DOUBLE_STEP,
-                       COUNT_GRID, COUNT_NOT_STEP, DEFAULT_IMAGE,
-                       FINISH_HEIGHT, FINISH_IMAGE, FINISH_WIDTH, FONT,
-                       FONT_COLOR, GRID_SIZE, HELP_COLOR, LINE_COLOR, MENU,
-                       MENU_BORDER, MENU_HEIGHT, MENU_WIDTH, NAME_PLAY,
-                       PLAYER_IMAGE, SCREEN_HEIGHT, SCREEN_WIDTH)
+from constants import (
+    ALL_WIDTH, BACKGROUND_IMAGE, BACKGROUND_IMAGE_LOSS, BACKGROUND_IMAGE_MAIN,
+    BACKGROUND_IMAGE_MENU, BEETWEEN_HEAD_1_TEXT, BETWEEN_HEAD_HEAD_1,
+    BOARD_BORDER_X_R, BOARD_BORDER_Y, BOARD_HEIGHT, BOARD_WIDTH,
+    CELL_DOUBLE_STEP_COLOR, CELL_NOT_STEP_COLOR, COMP_IMAGE,
+    COUNT_DOUBLE_STEP, COUNT_GRID, COUNT_NOT_STEP, DEFAULT_IMAGE,
+    FINISH_HEIGHT, FINISH_IMAGE, FINISH_WIDTH, FONT, FONT_COLOR, GRID_SIZE,
+    HELP_COLOR, LINE_COLOR, MENU, MENU_BORDER, MENU_HEIGHT, MENU_WIDTH,
+    MESSAGE, MESSAGE_NOT_STEP, NAME_PLAY, PLAYER_IMAGE, SCREEN_HEIGHT,
+    SCREEN_WIDTH
+)
 from interface.button import Button, RadioButton
 from interface.cells import Cell, Cells, CellsHelp
 from interface.sprites import Cube, Player
@@ -222,7 +222,8 @@ def draw_in_position(image, new_position, opponent_image, opponent_position):
 def background_menu(image, screen, size=(ALL_WIDTH, SCREEN_HEIGHT)):
     """Фоновая картинка и кнопка меню."""
     background = pygame.transform.scale(
-        pygame.image.load(image).convert(), size
+        # pygame.image.load(image).convert(), size
+        pygame.image.load(image).convert_alpha(), size
     )
     screen.blit(background, (0, 0))
     menu.draw(screen)
@@ -250,12 +251,13 @@ def main_scene():
     cells_double_step.draw(screen)
     # расстановка двух фишек на старт
     draw_in_position(player.image, player.position, comp.image, comp.position)
+    
 
     end_play = False
     while not end_play:
         if not comp.double_step and not player.not_step:  # ХОД ПОЛЬЗОВАТЕЛЯ
             # получаем значение строны кубика, которое выпало
-            value = cube.generate_cube_values('Ходите', screen)
+            value = cube.generate_cube_values(MESSAGE, screen)
             screen.blit(cube.image, cube.rect)
             cells_help.get_position(value, player.position)
             # если есть куда идти т е есть ячейки-подсказки
@@ -304,11 +306,12 @@ def main_scene():
                     check_double_not_step(
                         player, comp, cells_double_step, cells_not_step
                     )
-            else:
+            # else:
                 # Если ячеек-подсказок нет - ходить не куда = пропуск хода.
                 # Например: рядом граница и ходить не куда дальше.
-                # ПРИДУМАТЬ В КАК СООБЩАТЬ
-                print('Переход хода.')
+                # text = pygame.font.Font(FONT, 18).render(MESSAGE_NOT_STEP, True, (255, 255, 255))
+                # выводим текст-подсказку ? там комп ходит и пользовательне успеет прочитать
+                # screen.blit(text, (910, 360))
 
         # если у игрока ещё один ход, то комп в пролете:
         # ХОД КОМПА
@@ -391,7 +394,8 @@ def print_text(texts, text_position, between_text):
 def rules_game_scene():
     """Правила игры."""
     background_menu(BACKGROUND_IMAGE, screen)
-    head_text = font_head.render('Правила игры.', True, FONT_COLOR)
+    NAME_SCENE = 'Правила игры.'
+    head_text = font_head.render(NAME_SCENE, True, FONT_COLOR)
     text_width, text_height = head_text.get_size()
     screen.blit(head_text, ((ALL_WIDTH - text_width) // 2, 15 + text_height))
 
@@ -471,7 +475,8 @@ def winning_screne():
             center=(screen.get_width() // 2, text_position_y)
         )
     )
-    qwestion = font_head.render('Играть ещё?', True, FONT_COLOR)
+    QWESTION_TEXT = 'Играть ещё?'
+    qwestion = font_head.render(QWESTION_TEXT, True, FONT_COLOR)
     text_position_y += 30
     screen.blit(
         qwestion,
@@ -493,14 +498,14 @@ def winning_screne():
 def settings_screne():
     """Настройки. Статус: В работе"""
     background_menu(BACKGROUND_IMAGE, screen)
-
+    NAME_SCRENE = 'Настройки'
     # создаем изображение залоговка c шрифтом font цветом FONT_COLOR
-    head_text = font_head.render('Настройки', True, FONT_COLOR)
+    head_text = font_head.render(NAME_SCRENE, True, FONT_COLOR)
     text_width, text_height = head_text.get_size()
     # выводим на экран
     screen.blit(head_text, ((ALL_WIDTH - text_width) // 2, 15 + text_height))
-
-    head1_text = font_head_1.render('Уровень сложности', True, FONT_COLOR)
+    HEAD_TEXT = 'Уровень сложности'
+    head1_text = font_head_1.render(HEAD_TEXT, True, FONT_COLOR)
     text_width, text_height = head1_text.get_size()
     screen.blit(
         head1_text,
@@ -509,14 +514,15 @@ def settings_screne():
 
     y = BETWEEN_HEAD_HEAD_1 + text_height + BEETWEEN_HEAD_1_TEXT
     BEETWEEN_RADIOBUTTON = 30
+    LEVEL_TEXT = ['Легкий', 'Обычный']
     radio_buttons = [
         RadioButton(
-            ALL_WIDTH // 2 - 100, 300, 'Легкий',
+            ALL_WIDTH // 2 - 100, 300, LEVEL_TEXT[0],
             font_text, FONT_COLOR),
         RadioButton(
             ALL_WIDTH // 2 - 100,
             y + BEETWEEN_RADIOBUTTON,
-            'Обычный', font_text, FONT_COLOR
+            LEVEL_TEXT[1], font_text, FONT_COLOR
         )
     ]
 
@@ -561,6 +567,7 @@ def settings_screne():
 
 def loss_screne():
     """Проигрыш."""
+    
     background_menu(BACKGROUND_IMAGE_LOSS, screen)
     BUTTON_TEXTS = ['Играть!']
     buttons = Button.create_buttons_horizontally(screen, BUTTON_TEXTS, 350)

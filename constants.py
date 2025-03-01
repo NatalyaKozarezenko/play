@@ -71,3 +71,6 @@ BEETWEEN_HEAD_1_TEXT = 80
 COUNT_NOT_STEP = 8
 COUNT_DOUBLE_STEP = 3
 NAME_PLAY = 'Шахматная игра-бродилка.'
+
+MESSAGE = 'Ходите'
+MESSAGE_NOT_STEP = 'Переход хода.'
