@@ -2,7 +2,7 @@ from random import randint
 
 import pygame
 
-from constants import (BISHOP_IMAGE, BOARD_BACKGROUND_COLOR, BOARD_BORDER_X_R,
+from constants import (BISHOP_IMAGE, BACKGROUND_COLOR, BOARD_BORDER_X_R,
                        BOARD_BORDER_Y, BOARD_HEIGHT, BOARD_WIDTH, COUNT_GRID,
                        FINISH_HEIGHT, FINISH_WIDTH, GRID_SIZE, KING_IMAGE,
                        KNIGHT_IMAGE, LINE_COLOR, PAWN_IMAGE, QUEEN_IMAGE,
@@ -17,7 +17,7 @@ class Cell:
 
     def __init__(self, position=None):
         """Пустая базовая чейка."""
-        self.color = BOARD_BACKGROUND_COLOR
+        self.color = BACKGROUND_COLOR
         self.position = position
 
     def draw(self, screen, color=None, position=None):

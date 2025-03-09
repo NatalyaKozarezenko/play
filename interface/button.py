@@ -1,6 +1,6 @@
 import pygame
 
-from constants import ALL_WIDTH, FONT, FONT_COLOR, LEFT_PANEL, SCREEN_WIDTH
+from constants import ALL_WIDTH, FONT, TEXT_COLOR
 
 
 class Button():
@@ -10,23 +10,18 @@ class Button():
 
     def __init__(self, x, y, text):
         """Дизан и текст кнопки."""
-        self.font = pygame.font.Font(FONT, 20)
-        self.button_color = (0, 214, 117)
-        self.border_color = (0, 0, 0)
-        self.border_width = 1
+        font = pygame.font.Font(FONT, 20)
         self.rect = pygame.Rect(x, y, self.BUTTON_WIDTH, self.BUTTON_HEIGHT)
         self.text = text
-        self.text_rendered = self.font.render(self.text, True, FONT_COLOR)
+        self.text_rendered = font.render(self.text, True, TEXT_COLOR)
 
     def draw(self, screen):
         """Кнопка на экран."""
-        pygame.draw.rect(screen, self.button_color, self.rect)
-        pygame.draw.rect(
-            screen,
-            self.border_color,
-            self.rect,
-            self.border_width
-        )
+        BUTTON_COLOR = (0, 214, 117)
+        BORDER_COLOR = (0, 0, 0)
+        BORDER_WIDTH = 1
+        pygame.draw.rect(screen, BUTTON_COLOR, self.rect)
+        pygame.draw.rect(screen, BORDER_COLOR, self.rect, BORDER_WIDTH)
         text_rect = self.text_rendered.get_rect(center=self.rect.center)
         screen.blit(self.text_rendered, text_rect)
 
@@ -52,8 +47,7 @@ class Button():
         buttons = []
         count_buttons = len(button_texts)
         x_position = (
-            SCREEN_WIDTH + LEFT_PANEL
-            - Button.BUTTON_WIDTH * count_buttons
+            ALL_WIDTH - Button.BUTTON_WIDTH * count_buttons
             - between_buttons * (count_buttons - 1)
         ) // 2
         for count_button in range(len(button_texts)):

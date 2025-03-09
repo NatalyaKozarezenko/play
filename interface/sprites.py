@@ -2,19 +2,19 @@ import random
 
 import pygame
 
-from constants import (BISHOP_IMAGE, BOARD_BACKGROUND_COLOR, CUBE_HEIGHT,
-                       CUBE_WIDTH, DEFAULT_IMAGE, FONT, GRID_SIZE, KING_IMAGE,
-                       KNIGHT_IMAGE, LEFT_PANEL, MENU_BORDER, MENU_HEIGHT,
-                       PAWN_IMAGE, QUEEN_IMAGE, ROOK_IMAGE, SCREEN_HEIGHT,
+from constants import (BISHOP_IMAGE, BACKGROUND_COLOR, CAST,
+                       CUBE_HEIGHT, CUBE_WIDTH, PLAYER_IMAGE,
+                       GRID_SIZE, KING_IMAGE, KNIGHT_IMAGE, LEFT_PANEL,
+                       MENU_BORDER, MENU_HEIGHT, PAWN_IMAGE, QUEEN_IMAGE,
+                       ROOK_IMAGE, SCREEN_HEIGHT, HELP_COLOR,
                        SCREEN_WIDTH, STRAT_HEIGHT, STRAT_WIDTH)
 
 clock = pygame.time.Clock()
 
-
 class Cube(pygame.sprite.Sprite):
     """Кубик."""
 
-    def __init__(self, filename=DEFAULT_IMAGE):
+    def __init__(self, filename=PAWN_IMAGE):
         """Инициализация кубика."""
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(filename).convert_alpha()
@@ -27,27 +27,12 @@ class Cube(pygame.sprite.Sprite):
 
     def cast(self, screen):
         """Анимация броска кубика."""
-        image_sprite = {
-            pygame.image.load('images/myrotation1.png'): -20,
-            pygame.image.load('images/myrotation2.png'): -40,
-            pygame.image.load('images/myrotation3.png'): -60,
-            pygame.image.load('images/myrotation4.png'): -80,
-            pygame.image.load('images/myrotation1.png'): -100,
-            pygame.image.load('images/myrotation2.png'): -80,
-            pygame.image.load('images/myrotation3.png'): -60,
-            pygame.image.load('images/myrotation4.png'): -40,
-            pygame.image.load('images/myrotation1.png'): -20
-        }
+        y_up = [-20, -40, -60, -80, -100, -80, -60, -40]
+        image_sprite = {}
+        for id, image in enumerate(CAST * 2):
+            image_sprite[pygame.image.load(image)] = y_up[id]
         for image, value in image_sprite.items():
-            # очищаем всю левую часть, кроме меню в чёрное.
-            reset_rect = pygame.Rect(
-                (SCREEN_WIDTH + 1, MENU_BORDER + MENU_HEIGHT),
-                (LEFT_PANEL, SCREEN_HEIGHT)
-            )
-            pygame.draw.rect(screen, BOARD_BACKGROUND_COLOR, reset_rect)
-            # думаю надо ли текст-подсказку
-            # text = font.render('Бросаем кубик...', True, (255, 255, 255))
-            # screen.blit(text, (self.rect.x - 40, self.rect.y - 25))
+            self.reset(screen)
             screen.blit(
                 pygame.transform.scale(image, (CUBE_WIDTH, CUBE_HEIGHT)),
                 (self.rect.x, self.rect.y + value)
@@ -55,23 +40,7 @@ class Cube(pygame.sprite.Sprite):
             pygame.display.update()
             clock.tick(15)
 
-    def draw(self, filename, message, screen):
-        """Отрисовка выпавшей строны куба."""
-        # закрасили
-        player = pygame.Rect(
-            (self.rect.x - 40, self.rect.y - 25),
-            (CUBE_WIDTH + 100, CUBE_HEIGHT + 25)
-        )
-        pygame.draw.rect(screen, BOARD_BACKGROUND_COLOR, player)
-        text = pygame.font.Font(FONT, 18).render(
-            message, True, (255, 255, 255)
-        )
-        # выводим текст-подсказку
-        screen.blit(text, (self.rect.x - 40, self.rect.y - 25))
-        # отрисовали нужное
-        self.__init__(filename)
-
-    def generate_cube_values(self, message, screen):
+    def generate_cube_values(self, font_text, message, screen):
         """Генерим выпавшее значение строны куба и вызываем отрисовку."""
         self.cast(screen)  # анимация броска кубика
         values = [
@@ -82,13 +51,26 @@ class Cube(pygame.sprite.Sprite):
         ]
 
         image_cube = random.choice(values)
-        self.draw(image_cube, message, screen)
+        self.reset(screen)
+        # выводим текст-подсказку
+        help_text = font_text.render(message, True, HELP_COLOR)
+        screen.blit(help_text, (self.rect.x, self.rect.y - 25))
+        # отрисовали нужное
+        self.__init__(image_cube)
+        # self.draw(image_cube, font_text, message, screen)
         return image_cube
 
+    def reset(self, screen):
+        """закрашиваем всю левую часть, кроме меню в чёрное."""
+        reset_rect = pygame.Rect(
+            (SCREEN_WIDTH + 1, MENU_BORDER + MENU_HEIGHT),
+            (LEFT_PANEL, SCREEN_HEIGHT)
+        )
+        pygame.draw.rect(screen, BACKGROUND_COLOR, reset_rect)
 
 class Player(pygame.sprite.Sprite):
     """Фишки игроков."""
-    def __init__(self, filename=DEFAULT_IMAGE):
+    def __init__(self, filename=PLAYER_IMAGE):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(filename).convert_alpha()
         self.image = pygame.transform.scale(
