@@ -52,12 +52,9 @@ class Cube(pygame.sprite.Sprite):
 
         image_cube = random.choice(values)
         self.reset(screen)
-        # выводим текст-подсказку
         help_text = font_text.render(message, True, HELP_COLOR)
         screen.blit(help_text, (self.rect.x, self.rect.y - 25))
-        # отрисовали нужное
         self.__init__(image_cube)
-        # self.draw(image_cube, font_text, message, screen)
         return image_cube
 
     def reset(self, screen):

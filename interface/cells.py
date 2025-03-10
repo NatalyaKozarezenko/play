@@ -8,7 +8,6 @@ from constants import (BISHOP_IMAGE, BACKGROUND_COLOR, BOARD_BORDER_X_R,
                        KNIGHT_IMAGE, LINE_COLOR, PAWN_IMAGE, QUEEN_IMAGE,
                        ROOK_IMAGE, START_IMAGE, STRAT_HEIGHT, STRAT_WIDTH)
 
-# Список занятых ячейк: старт, финиш и др. чтоб ячейки не накладывались
 used_cells = [(STRAT_WIDTH, STRAT_HEIGHT), (FINISH_WIDTH, FINISH_HEIGHT)]
 
 
@@ -53,8 +52,6 @@ class Cells(Cell):
         while len(self.positions) < self.count:
             position = self.randomize_position()
             if position not in used_cells:
-                # чтоб ячейки не накладвались друг на друга,
-                # сразу добавим к занятым
                 list.append(used_cells, position)
                 list.append(self.positions, position)
 
